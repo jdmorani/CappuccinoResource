@@ -51,7 +51,13 @@ var defaultIdentifierKey = @"id",
     }
 
     var attributeNames = [CPArray array],
-        attributes     = class_copyIvarList([self class]);
+        klass          = [self class],
+        attributes     = class_copyIvarList(klass);
+
+    //retrieve ivar from parent class if any (except if the parent class is CappuccinoResource)
+    while((klass = class_getSuperclass(klass)) != CappuccinoResource)
+        [attributes addObjectsFromArray:class_copyIvarList(klass)];
+
 
     for (var i = 0; i < attributes.length; i++) {
         [attributeNames addObject:attributes[i].name];
@@ -68,14 +74,49 @@ var defaultIdentifierKey = @"id",
         if (attribute == [[self class] identifierKey]) {
             [self setIdentifier:attributes[attribute].toString()];
         } else {
-            var attributeName = [attribute cappifiedString];
+            var attributeName = attribute; //[attribute cappifiedString];
             if ([[self attributeNames] containsObject:attributeName]) {
                 var value = attributes[attribute];
+                var numberOfArrayElements = 1;
+                var objectArray = nil;
                 /*
                  * I would much rather retrieve the ivar class than pattern match the
                  * response from Rails, but objective-j does not support this.
-                */
-                switch (typeof value) {
+                */           
+                switch (typeOf(value)) {
+                    case "array":
+                        numberOfArrayElements = value.length;
+                        objectArray = [CPArray array];                        
+                    case "object":
+                        if(value)
+                        {
+                            try
+                            {
+                                for(var i=0;i<numberOfArrayElements;i++)
+                                {                               
+                                    var resource = [self getResourceForCustomAttribute:attributeName];
+                                    if(objectArray)
+                                        [resource setAttributes:value[i]];
+                                    else
+                                        [resource setAttributes:value];
+                                        
+                                    if(objectArray)
+                                        [objectArray addObject:resource]
+                                    else
+                                        [self setValue:resource forKey:attributeName];
+                                }
+                                if(objectArray)
+                                {
+                                    [self setValue:objectArray forKey:attributeName];                                    
+                                }
+                            }
+                            catch(anException)
+                            {
+                                CPLog.warn(@"An issue occured while translating a JSON attribute("+attributeName+") to a valid object -- " + anException)
+                            }
+                            break;
+                        }
+                        break;
                     case "boolean":
                         if (value) {
                             [self setValue:YES forKey:attributeName];

@@ -3,6 +3,24 @@
 @import <Foundation/CPURLConnection.j>
 @import <Foundation/CPURLRequest.j>
 
+//vanilla typeof does not differentiate between
+//an object and an array. This typeOf method is
+//meant to solve this problem.
+//http://javascript.crockford.com/remedial.html
+function typeOf(value) {
+    var s = typeof value;
+    if (s === 'object') {
+        if (value) {
+            if (value instanceof Array) {
+                s = 'array';
+            }
+        } else {
+            s = 'null';
+        }
+    }
+    return s;
+}
+
 @implementation CPDate (CRSupport)
 
 + (CPDate)dateWithDateString:(CPString)aDate
