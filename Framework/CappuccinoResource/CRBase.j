@@ -400,4 +400,10 @@ var defaultIdentifierKey = @"id",
     [[CPNotificationCenter defaultCenter] postNotificationName:notificationName object:self];
 }
 
+-(void)resourceDidNotDestroy
+{
+    var notificationName = [self className] + "ResourceDidNotDestroy";
+    [[CPNotificationCenter defaultCenter] postNotificationName:notificationName object:self];
+}
+
 @end
