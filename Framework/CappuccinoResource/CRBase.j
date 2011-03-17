@@ -314,6 +314,11 @@ var defaultIdentifierKey = @"id",
     return resourceArray;
 }
 
++ (void)collectionDidNotLoad:(CPString)aResponse
+{
+    [[CPNotificationCenter defaultCenter] postNotificationName:@"CollectionDidNotLoad" object:self];
+}
+
 - (CPURLRequest)resourceWillSave
 {
     var abstractNotificationName = [self className] + "ResourceWillSave";
