@@ -374,8 +374,8 @@ var defaultIdentifierKey = @"id",
         var notificationName = [self className] + "ResourceDidNotCreate";
     }
 
-    [[CPNotificationCenter defaultCenter] postNotificationName:notificationName object:self];
-    [[CPNotificationCenter defaultCenter] postNotificationName:abstractNotificationName object:self];
+    [[CPNotificationCenter defaultCenter] postNotificationName:notificationName object:aResponse];
+    [[CPNotificationCenter defaultCenter] postNotificationName:abstractNotificationName object:aResponse];
 }
 
 - (CPURLRequest)resourceWillDestroy
