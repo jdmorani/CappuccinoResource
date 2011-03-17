@@ -19,7 +19,7 @@ var defaultIdentifierKey = @"id",
 // override this method for more complex inflections
 + (CPURL)resourcePath
 {
-    return [CPURL URLWithString:@"/" + [self railsName] + @"s"];
+    return [CPURL URLWithString:[self railsName] + @"s"];
 }
 
 + (CPString)railsName
