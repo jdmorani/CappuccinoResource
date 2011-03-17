@@ -119,6 +119,46 @@
 
 @implementation CPURLConnection (CRSupport)
 
++ (CPArray)sendAsynchronousRequest:(CPURLRequest)aRequest postTarget:(id)aTarget postAction:(SEL)anAction postActionOnError:(SEL)anActionOnError
+{
+    var request = [CPURLRequest requestJSONWithURL:[[aRequest URL] absoluteString]];
+ 
+    [request setHTTPMethod:[aRequest HTTPMethod]];
+    [request setHTTPBody:[aRequest HTTPBody]];
+        
+    var connection = [CPURLConnection connectionWithRequest:request delegate:self];
+    
+    connection.postTarget        = aTarget;
+    connection.postAction        = anAction;
+    connection.postActionOnError = anActionOnError;        
+}
+
++ (void)connection:(CPURLConnection)aConnection didReceiveResponse:(CPURLResponse)aResponse
+{
+    if (![aResponse respondsToSelector:@selector(statusCode)])
+        return; 
+    
+    var code = [aResponse statusCode];
+    
+    if ((code == 0 || code >= 400) && aConnection.postTarget && aConnection.postActionOnError)
+        aConnection.postTarget._invalidated = YES;
+}
+
++ (void)connection:(CPURLConnection)aConnection didReceiveData:(CPString)aResponse
+{
+    if (aConnection.postTarget && 
+        aConnection.postActionOnError && [aConnection.postTarget respondsToSelector:aConnection.postActionOnError] &&
+        aConnection.postTarget._invalidated)
+    {
+        aConnection.postTarget._invalidated = NO;
+        return [aConnection.postTarget performSelector:aConnection.postActionOnError withObject:aResponse];
+    }
+    
+    if (aConnection.postTarget && aConnection.postAction && [aConnection.postTarget respondsToSelector:aConnection.postAction])
+        [aConnection.postTarget performSelector:aConnection.postAction withObject:aResponse];
+}
+
+
 // Works just like built-in method, but returns CPArray instead of CPData.
 // First value in array is HTTP status code, second is data string.
 + (CPArray)sendSynchronousRequest:(CPURLRequest)aRequest

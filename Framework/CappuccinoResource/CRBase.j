@@ -137,16 +137,10 @@ var defaultIdentifierKey = @"id",
     if (!request) {
         return NO;
     }
-
-    var response = [CPURLConnection sendSynchronousRequest:request];
-
-    if (response[0] >= 400) {
-        [self resourceDidNotSave:response[1]];
-        return NO;
-    } else {
-        [self resourceDidSave:response[1]];
-        return YES;
-    }
+    
+    var response = [CPURLConnection sendAsynchronousRequest:request postTarget:self 
+                                                                    postAction:@selector(resourceDidSave:) 
+                                                                    postActionOnError:@selector(resourceDidNotSave:)];
 }
 
 - (BOOL)destroy
@@ -157,14 +151,9 @@ var defaultIdentifierKey = @"id",
         return NO;
     }
 
-    var response = [CPURLConnection sendSynchronousRequest:request];
-
-    if (response[0] == 200) {
-        [self resourceDidDestroy];
-        return YES;
-    } else {
-        return NO;
-    }
+    var response = [CPURLConnection sendAsynchronousRequest:request postTarget:self 
+                                                                    postAction:@selector(resourceDidDestroy)
+                                                                    postActionOnError:@selector(resourceDidNotDestroy:)];
 }
 
 + (CPArray)all
@@ -174,27 +163,19 @@ var defaultIdentifierKey = @"id",
     if (!request) {
         return NO;
     }
-
-    var response = [CPURLConnection sendSynchronousRequest:request];
-
-    if (response[0] >= 400) {
-        return nil;
-    } else {
-        return [self collectionDidLoad:response[1]];
-    }
+    
+    var response = [CPURLConnection sendAsynchronousRequest:request postTarget:self 
+                                                                    postAction:@selector(collectionDidLoad:)
+                                                                    postActionOnError:@selector(collectionDidNotLoad:)];
 }
 
 + (CPArray)allWithParams:(JSObject)params
 {
     var request = [self collectionWillLoad:params];
 
-    var response = [CPURLConnection sendSynchronousRequest:request];
-
-    if (response[0] >= 400) {
-        return nil;
-    } else {
-        return [self collectionDidLoad:response[1]];
-    }
+    var response = [CPURLConnection sendAsynchronousRequest:request postTarget:self 
+                                                                    postAction:@selector(collectionDidLoad:)
+                                                                    postActionOnError:@selector(collectionDidNotLoad:)];
 }
 
 + (id)find:(CPString)identifier
@@ -205,13 +186,9 @@ var defaultIdentifierKey = @"id",
         return NO;
     }
 
-    var response = [CPURLConnection sendSynchronousRequest:request];
-
-    if (response[0] >= 400) {
-        return nil;
-    } else {
-        return [self resourceDidLoad:response[1]];
-    }
+    var response = [CPURLConnection sendAsynchronousRequest:request postTarget:self 
+                                                                    postAction:@selector(resourceDidLoad:)
+                                                                    postActionOnError:@selector(resourceDidNotLoad:)];
 }
 
 + (id)findWithParams:(JSObject)params
