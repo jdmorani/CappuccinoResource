@@ -235,7 +235,6 @@ var defaultIdentifierKey = @"id",
 + (id)findWithParams:(JSObject)params
 {
     var collection = [self allWithParams:params];
-    return [collection objectAtIndex:0];
 }
 
 // All the following methods post notifications using their class name
